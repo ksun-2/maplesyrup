@@ -47,21 +47,23 @@ public class Movement : MonoBehaviour
     }
     void onTriggerStayEvent(Collider2D col)
     {
-        if (Input.GetKey("up") && attackActionable)
+        if ((Input.GetKey("up") || (_controller.isGrounded && Input.GetKey("down")))&& attackActionable)
         {
             isClimbing = true;
+			_controller.ignoreOneWayPlatformsThisFrame = true;
         }
     }
     private void OnTriggerExitEvent(Collider2D col)
     {
         isClimbing = false;
+		_controller.ignoreOneWayPlatformsThisFrame = false;
     }
 
     void Update()
     {
         if (isClimbing)
         {
-            //really glitchy at top of ladder, can't even climb down from platform
+            //still bouncing on top of ladder glitch lol
             _animator.Play(Animator.StringToHash("Jump")); //placeholder...
             //jump off
             var side = Input.GetAxisRaw("Horizontal");
@@ -75,7 +77,7 @@ public class Movement : MonoBehaviour
                 {
                 	_velocity.x = -runSpeed;
                 }
-                Jump(0.5f);
+                Jump(0.4f);
                 isClimbing = false;
             }
             else
