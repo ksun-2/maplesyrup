@@ -55,9 +55,7 @@ public class Movement : MonoBehaviour
     }
     public void OnTriggerExitEvent(Collider2D col)
     {
-        canClimb = false;
-        isClimbing = false;
-        _controller.ignoreOneWayPlatformsThisFrame = false;
+        stopClimbing();
     }
 
     void Update()
@@ -71,7 +69,6 @@ public class Movement : MonoBehaviour
         }
         if (isClimbing)
         {
-            //I CANT FIGURE OUT HOW TO FIX GLITCHINESS ON PLATFORM ABOVE LADDER AAAAAAAAAAA
             _animator.Play(Animator.StringToHash("Jump")); //placeholder...
             //jump off
             var side = Input.GetAxisRaw("Horizontal");
@@ -191,5 +188,10 @@ public class Movement : MonoBehaviour
     {
         _velocity.y = Mathf.Sqrt(2f * jumpHeight * -gravity * height);
         _animator.Play(Animator.StringToHash("Jump"));
+    }
+    public void stopClimbing(){
+        canClimb = false;
+        isClimbing = false;
+        _controller.ignoreOneWayPlatformsThisFrame = false;
     }
 }
