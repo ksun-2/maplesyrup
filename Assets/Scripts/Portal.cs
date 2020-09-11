@@ -8,6 +8,7 @@ using Prime31;
 public class Portal : MonoBehaviour
 {
     public GameObject player;
+    public string sceneDest;
     private bool attackActionable;
     private CharacterController2D _controller;
     private Combat _combat;
@@ -18,10 +19,9 @@ public class Portal : MonoBehaviour
     }
     void OnTriggerStay2D(Collider2D col)
     {
-        //ladder
-        if (Input.GetKey("up") && _controller.isGrounded && attackActionable)
+        if (Input.GetKeyDown("up") && _controller.isGrounded && attackActionable)
         {
-            SceneManager.LoadScene("2");
+            SceneManager.LoadScene(sceneDest);
         }
     }
     void Update()
