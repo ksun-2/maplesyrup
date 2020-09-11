@@ -19,6 +19,7 @@ public class Movement : MonoBehaviour
     private float normalizedHorizontalSpeed = 0;
     private float normalizedLadderSpeed = 0;
     private bool attackActionable = true;
+    private bool canClimb = false;
     private bool isClimbing;
     private Combat _combat;
     private CharacterController2D _controller;
@@ -36,7 +37,7 @@ public class Movement : MonoBehaviour
         _combat = GetComponent<Combat>();
 
         _controller.onControllerCollidedEvent += onControllerCollider;
-        _controller.onTriggerStayEvent += onTriggerStayEvent;
+        _controller.onTriggerEnterEvent += onTriggerEnterEvent;
         _controller.onTriggerExitEvent += OnTriggerExitEvent;
     }
 
@@ -45,26 +46,29 @@ public class Movement : MonoBehaviour
         if (hit.normal.y == 1f)
             return;
     }
-    void onTriggerStayEvent(Collider2D col)
+    void onTriggerEnterEvent(Collider2D col)
     {
-        //ladder
-        //GOING DOWN IS BAD BECAUSE THE TRIGGER DOESN'T STAY FOREVER WHEN YOU STAND
-        //ON PLATFORM ABOVE LADDER :thumbsdown:
-        if ((Input.GetKey("up") || (_controller.isGrounded && Input.GetKey("down"))) 
-        && attackActionable && col.gameObject.layer == LayerMask.NameToLayer("Ladders"))
+        if (col.gameObject.layer == LayerMask.NameToLayer("Ladders"))
         {
-            isClimbing = true;
-            _controller.ignoreOneWayPlatformsThisFrame = true;
+            canClimb = true;
         }
     }
-    void OnTriggerExitEvent(Collider2D col)
+    public void OnTriggerExitEvent(Collider2D col)
     {
+        canClimb = false;
         isClimbing = false;
         _controller.ignoreOneWayPlatformsThisFrame = false;
     }
 
     void Update()
     {
+        //ladder
+        //no climb down for now
+        if (canClimb && Input.GetKey("up") && attackActionable)
+        {
+            isClimbing = true;
+            _controller.ignoreOneWayPlatformsThisFrame = true;
+        }
         if (isClimbing)
         {
             //I CANT FIGURE OUT HOW TO FIX GLITCHINESS ON PLATFORM ABOVE LADDER AAAAAAAAAAA
