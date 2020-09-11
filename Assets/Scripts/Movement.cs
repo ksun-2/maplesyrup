@@ -28,6 +28,8 @@ public class Movement : MonoBehaviour
     private Vector3 _velocity;
     private SpriteRenderer _renderer;
 
+    public GameObject feetBox;
+    private FeetBox _feetBox; //lol
 
     void Awake()
     {
@@ -35,6 +37,8 @@ public class Movement : MonoBehaviour
         _controller = GetComponent<CharacterController2D>();
         _renderer = GetComponent<SpriteRenderer>();
         _combat = GetComponent<Combat>();
+        
+        _feetBox = feetBox.GetComponent<FeetBox>();
 
         _controller.onControllerCollidedEvent += onControllerCollider;
         _controller.onTriggerEnterEvent += onTriggerEnterEvent;
@@ -120,7 +124,7 @@ public class Movement : MonoBehaviour
             }
         }
         //not climbing:
-        else
+        else if (_feetBox.actionable)
         {
             attackActionable = _combat.actionable;
             if (_controller.isGrounded)
@@ -190,6 +194,8 @@ public class Movement : MonoBehaviour
         _animator.Play(Animator.StringToHash("Jump"));
     }
     public void stopClimbing(){
+        //ladder workaround... ladder edge collider needs to be 0.03 less than it's
+        //supposed to be visually.
         canClimb = false;
         isClimbing = false;
         _controller.ignoreOneWayPlatformsThisFrame = false;

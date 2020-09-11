@@ -6,6 +6,10 @@ using Prime31;
 
 public class FeetBox : MonoBehaviour
 {
+    [HideInInspector]
+    public bool actionable = true;
+    private float duration = 0.05f;
+    private float actionableTime;
     public GameObject player;
     private CharacterController2D _controller;
     void Awake(){
@@ -15,6 +19,13 @@ public class FeetBox : MonoBehaviour
         if (col.gameObject.layer == LayerMask.NameToLayer("Ladders")){
             player.GetComponent<Movement>().stopClimbing();
             _controller.velocity.y = 0;
+
+            actionable = false;
+            actionableTime = Time.time + duration;
         }
+        Invoke("SetActionableTrue", duration);
+    }
+    private void SetActionableTrue(){
+        actionable = true;
     }
 }
