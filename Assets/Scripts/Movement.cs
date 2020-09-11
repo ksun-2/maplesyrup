@@ -47,23 +47,27 @@ public class Movement : MonoBehaviour
     }
     void onTriggerStayEvent(Collider2D col)
     {
-        if ((Input.GetKey("up") || (_controller.isGrounded && Input.GetKey("down")))&& attackActionable)
+        //ladder
+        //GOING DOWN IS BAD BECAUSE THE TRIGGER DOESN'T STAY FOREVER WHEN YOU STAND
+        //ON PLATFORM ABOVE LADDER :thumbsdown:
+        if ((Input.GetKey("up") || (_controller.isGrounded && Input.GetKey("down"))) 
+        && attackActionable && col.gameObject.layer == LayerMask.NameToLayer("Ladders"))
         {
             isClimbing = true;
-			_controller.ignoreOneWayPlatformsThisFrame = true;
+            _controller.ignoreOneWayPlatformsThisFrame = true;
         }
     }
-    private void OnTriggerExitEvent(Collider2D col)
+    void OnTriggerExitEvent(Collider2D col)
     {
         isClimbing = false;
-		_controller.ignoreOneWayPlatformsThisFrame = false;
+        _controller.ignoreOneWayPlatformsThisFrame = false;
     }
 
     void Update()
     {
         if (isClimbing)
         {
-            //still bouncing on top of ladder glitch lol
+            //I CANT FIGURE OUT HOW TO FIX GLITCHINESS ON PLATFORM ABOVE LADDER AAAAAAAAAAA
             _animator.Play(Animator.StringToHash("Jump")); //placeholder...
             //jump off
             var side = Input.GetAxisRaw("Horizontal");
@@ -71,11 +75,11 @@ public class Movement : MonoBehaviour
             {
                 if (side > 0)
                 {
-                	_velocity.x = runSpeed;
+                    _velocity.x = runSpeed;
                 }
                 else
                 {
-                	_velocity.x = -runSpeed;
+                    _velocity.x = -runSpeed;
                 }
                 Jump(0.4f);
                 isClimbing = false;
@@ -104,10 +108,17 @@ public class Movement : MonoBehaviour
                 //snap to ladder
                 var currentPos = transform.position;
                 int rounded = (int)(currentPos.x / .32);
-                transform.position = new Vector2(rounded * .32f - 0.16f, currentPos.y);
+                if (transform.position.x < 0)
+                {
+                    transform.position = new Vector2(rounded * .32f - 0.16f, currentPos.y);
+                }
+                else
+                {
+                    transform.position = new Vector2(rounded * .32f + 0.16f, currentPos.y);
+                }
             }
         }
-		//not climbing:
+        //not climbing:
         else
         {
             attackActionable = _combat.actionable;
@@ -138,7 +149,7 @@ public class Movement : MonoBehaviour
                 if (_controller.isGrounded && attackActionable)
                     _animator.Play(Animator.StringToHash("Idle"));
             }
-            // jump (hold jump for animation bug)
+            // jump
             if (attackActionable && _controller.isGrounded && Input.GetButton("Jump"))
                 Jump(1f);
             // change velocity
@@ -160,12 +171,18 @@ public class Movement : MonoBehaviour
         {
             isClimbing = false;
         }
+        else if (!_controller.isGrounded && attackActionable)
+        {
+            _animator.Play(Animator.StringToHash("Jump"));
+            //always jump animation if in air
+            //lol not the best way to do this
+        }
     }
     void IgnoreOneWayPlatformsFalse()
     {
         _controller.ignoreOneWayPlatformsThisFrame = false;
     }
-	// 1 = jumpHeight
+    // 1 = jumpHeight
     void Jump(float height)
     {
         _velocity.y = Mathf.Sqrt(2f * jumpHeight * -gravity * height);
