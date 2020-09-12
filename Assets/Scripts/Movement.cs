@@ -30,6 +30,8 @@ public class Movement : MonoBehaviour
 
     public GameObject feetBox;
     private FeetBox _feetBox; //lol
+    public GameObject downClimb;
+    private DownClimb _downClimb;
 
     void Awake()
     {
@@ -39,6 +41,7 @@ public class Movement : MonoBehaviour
         _combat = GetComponent<Combat>();
         
         _feetBox = feetBox.GetComponent<FeetBox>();
+        _downClimb = downClimb.GetComponent<DownClimb>();
 
         _controller.onControllerCollidedEvent += onControllerCollider;
         _controller.onTriggerEnterEvent += onTriggerEnterEvent;
@@ -52,12 +55,13 @@ public class Movement : MonoBehaviour
     }
     void onTriggerEnterEvent(Collider2D col)
     {
-        if (col.gameObject.layer == LayerMask.NameToLayer("Ladders"))
+        if (col.IsTouching(this.GetComponent<BoxCollider2D>()) //can't be downclimb hitbox
+        && col.gameObject.layer == LayerMask.NameToLayer("Ladders"))
         {
             canClimb = true;
         }
     }
-    public void OnTriggerExitEvent(Collider2D col)
+    void OnTriggerExitEvent(Collider2D col)
     {
         stopClimbing();
     }
@@ -66,7 +70,7 @@ public class Movement : MonoBehaviour
     {
         //ladder
         //no climb down for now
-        if (canClimb && Input.GetKey("up") && attackActionable)
+        if ((canClimb && Input.GetKey("up")) || (_downClimb.canDownClimb && Input.GetKey("down")) && attackActionable)
         {
             isClimbing = true;
             _controller.ignoreOneWayPlatformsThisFrame = true;
